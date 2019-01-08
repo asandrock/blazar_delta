@@ -57,18 +57,46 @@ contains
     end interface
     real(dp) :: g_avg, eps_sp
 
-    g_avg = gamma_isotropic(eps_s*(1 + z), eps0)
     eps_sp = eps_s*(1 + z)
+    g_avg = gamma_isotropic(eps_sp, eps0)
     g_min = eps_sp/2*(1 + sqrt(1 + 1/(eps0*eps_sp)))
-    if (g_avg < g_min) then
-      ec_iso_mono = c*sigma_T*delta_D**3*eps_s*(1 + z)/(32*pi*d_L**2) &
+    if (g_avg > g_min) then
+      ec_iso_mono = c*sigma_T*delta_D**3*eps_sp/(32*pi*d_L**2) &
         *u0/eps0**3*Ne(g_avg/delta_D)/g_avg*M3(4*g_avg*eps0)
     else
-      ec_iso_mono = c*sigma_T*delta_D**3*eps_s*(1 + z)/(32*pi*d_L**2) &
+      ec_iso_mono = c*sigma_T*delta_D**3*eps_sp/(32*pi*d_L**2) &
         *u0/eps0**3*Ne(g_min/delta_D)/g_min*M3(4*g_min*eps0) &
         *(g_avg/g_min)**1.5_dp
     end if
   end function ec_iso_mono
+
+  function ec_point_mono(eps_s, z, d_L, delta_D, Gamm, Ne, L0, eps0, rr) 
+    ! v F_v for external Compton scattering on accretion disk photons, assuming
+    ! a monochromatic point source radially behind the jet
+    implicit none
+    real(dp) :: ec_point_mono, eps_s, z, d_L, delta_D, Gamm, L0, eps0, rr
+    interface
+      function Ne(g)
+        use const
+        real(dp) :: Ne, g
+      end function Ne
+    end interface
+    real(dp) :: eps_sp, g_min, mu_s, g_avg
+
+    eps_sp = eps_s*(1 + z)
+    mu_s = (Gamm*delta_D - 1)/(Gamm*sqrt(1 - 1/Gamm**2)*delta_D)
+    g_min = eps_sp/2*(1 + sqrt(1 + 2/(eps0*eps_sp*(1 - mu_s))))
+    g_avg = gamma_general(eps0, eps_sp, mu_s)
+    if (g_avg > g_min) then
+      ec_point_mono = eps_sp*L0*sigma_T*delta_D**3 &
+        /(16*pi**2*rr**2*d_L**2*eps0**2)*S3(g_avg*eps0*(1 - mu_s)) &
+        *Ne(g_avg/delta_D)
+    else
+      ec_point_mono = eps_sp*L0*sigma_T*delta_D**3 &
+        /(16*pi**2*rr**2*d_L**2*eps0**2)*S3(g_min*eps0*(1 - mu_s)) &
+        *Ne(g_min/delta_D)*(g_avg/g_min)**2
+    end if
+  end function ec_point_mono
 
   function ec_disk(eps_s, z, d_L, delta_D, Gamm, Ne, M_8, l_edd, eta, rr)
     ! v F_v for external Compton scattering on accretion disk photons, assuming
@@ -139,7 +167,7 @@ contains
           *S3(g_avg*eps*(1 - cos_psi))*Ne(g_avg/delta_D)
       else
         mu_integrand = prefactor*phi(R)/((1/mu**2 - 1)**1.5_dp*eps0(R)**2) &
-          *S3(g_avg*eps0(R)*(1 - cos_psi))*Ne(g_avg/delta_D) &
+          *S3(g_min*eps0(R)*(1 - cos_psi))*Ne(g_min/delta_D) &
           *(g_avg/g_min)**2
       end if
     end function mu_integrand
