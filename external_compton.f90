@@ -138,7 +138,7 @@ contains
 
     mu_min = 1/sqrt(1 + (R_out/rr)**2)
     mu_max = 1/sqrt(1 + (R_in/rr)**2)
-    call qags(ph_integrand, 0.0_dp, 2*pi, epsabs, epsrel, ec_disk, abserr, &
+    call qng(ph_integrand, 0.0_dp, 2*pi, epsabs, epsrel, ec_disk, abserr, &
       neval, ier)
   contains
     function ph_integrand(ph)
@@ -148,7 +148,7 @@ contains
       integer :: ph_neval, ph_ier
 
       ph_save = ph
-      call qags(mu_integrand, mu_min, mu_max, epsabs, epsrel, ph_integrand, &
+      call qng(mu_integrand, mu_min, mu_max, epsabs, epsrel, ph_integrand, &
         ph_err, ph_neval, ph_ier)
     end function ph_integrand
 
