@@ -6,7 +6,7 @@ program test_external_compton
   real(dp), parameter :: Gamm = 40.0_dp, delta_D = 40.0_dp, B = 0.56_dp, &
     g1 = 20.0_dp, g2 = 5e7_dp, gb = 1e4_dp, p1 = 2.0_dp, p2 = 3.5_dp, &
     M_8 = 12.0_dp, R_g = 1.8e14_dp, L_disk = 2e46_dp, eta = 1/12.0_dp
-  real(dp), parameter :: rr = 1e17_dp, d_L = 1e28_dp, z = 0.0_dp, &
+  real(dp), parameter :: rr = 1e19_dp, d_L = 1e28_dp, z = 0.0_dp, &
     u = L_disk/(4*pi*rr**2*c), Lumi_edd = 1.26e46_dp*M_8, &
     l_edd = L_disk/Lumi_edd, N0 = 1e50_dp
 
@@ -18,19 +18,18 @@ program test_external_compton
     nu = 10**(j/real(steps, dp))
     eps_s = h*nu/(me*c**2)
     print *, nu, &
-      ec_disk(eps_s, z, d_L, delta_D, Gamm, Ne, M_8, l_edd, eta, rr), &
-      ec_point_mono(eps_s, z, d_L, delta_D, Gamm, Ne, L_disk, e0, rr), &
-      ec_iso_mono(eps_s, z, d_L, delta_D, Ne, u, e0)
+      ec_disk(eps_s, z, d_L, delta_D, Gamm, Ne, M_8, l_edd, eta, rr, g1), &
+      ec_point_mono(eps_s, z, d_L, delta_D, Gamm, Ne, L_disk, e0, rr, g1), &
+      ec_iso_mono(eps_s, z, d_L, delta_D, Ne, u, e0, g1)
   end do
 contains
   function Ne(g)
     implicit none
     real(dp) :: Ne, g
 
-    !if (g < g1 .or. g > g2) then
-    !  Ne = 0.0_dp
-    !else
- if (g <= gb) then
+    if (g < g1 .or. g > g2) then
+      Ne = 0.0_dp
+    else if (g <= gb) then
       Ne = N0*(g/gb)**(-p1)
     else
       Ne = N0*(g/gb)**(-p2)
