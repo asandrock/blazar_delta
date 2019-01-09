@@ -6,7 +6,7 @@ endif
 F90 = gfortran
 FFLAGS = -Wall -ffpe-trap=invalid,zero -O3 -g -fPIC
 
-all: $(addprefix build/, test_compton test_external_compton)
+all: $(addprefix build/, test_compton test_external_compton test_ec_blr)
 objects_compton = $(addprefix build/, const.o quadpack.o compton.o dilog.o)
 objects_external = $(addprefix build/, gamma_avg.o zeroin.o external_compton.o)
 
@@ -16,10 +16,14 @@ build/test_compton: build/test_compton.o $(objects_compton) | build
 build/test_external_compton: build/test_external_compton.o $(objects_compton)\
  $(objects_external) | build
 	${F90} ${FFLAGS} -o $@ $^
+build/test_ec_blr: build/test_ec_blr.o $(objects_compton) $(objects_external)\
+ | build
+	${F90} ${FFLAGS} -o $@ $^
 
 # Add Module dependencies
 build/test_compton.o: $(addprefix build/, compton.o)
 build/test_external_compton.o: $(addprefix build/, external_compton.o)
+build/test_ec_blr.o: $(addprefix build/, external_compton.o)
 
 build/compton.o: $(addprefix build/, const.o quadpack.o dilog.o)
 build/gamma_avg.o: $(addprefix build/, zeroin.o compton.o)
