@@ -321,4 +321,13 @@ contains
       end if
     end function phi_int
   end function ec_dust
+
+  function f_dust(eps, z, d_L, Theta, L_disk, xi_dt)
+    implicit none
+    real(dp) :: f_dust, eps, z, d_L, Theta, L_disk, xi_dt, eps_bh
+
+    eps_bh = eps*(1 + z)
+    f_dust = L_disk*xi_dt/(4*pi*d_L**2)*15/pi**4*(eps/Theta)**4 &
+      *exp(-eps/Theta)/(1 - exp(-eps/Theta))
+  end function f_dust
 end module external_compton
