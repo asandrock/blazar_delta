@@ -5,10 +5,11 @@ module compton
   !use quadpack
   implicit none
 contains
-  function S0(x)
+  pure function S0(x)
     ! cf. eq. (11-13)
     implicit none
-    real(dp) :: S0, x
+    real(dp) :: S0
+    real(dp), intent(in) :: x
 
     if (x < 1e-2_dp) then
       S0 = 1 - 2*x + (26*x**2)/5 - (133*x**3)/10 + (1444*x**4)/35
@@ -36,10 +37,11 @@ contains
     end if
   end function M0
 
-  function S1(x)
+  pure function S1(x)
     ! cf. eq. (18-22)
     implicit none
-    real(dp) :: S1, x
+    real(dp) :: S1
+    real(dp), intent(in) :: x
 
     if (x < 1e-2_dp) then
       S1 = x
@@ -96,10 +98,11 @@ contains
     end function JC
   end function M1
 
-  function S2(x)
+  pure function S2(x)
     ! cf. eq. (32)
     implicit none
-    real(dp) :: S2, x
+    real(dp) :: S2
+    real(dp), intent(in) :: x
 
     if (x < 1e-3_dp) then
       S2 = 0.5_dp
@@ -107,10 +110,11 @@ contains
       S2 = 1/(1 + x/S1(x)*dS1_dx(x))
     end if
   contains
-    function dS1_dx(x)
+    pure function dS1_dx(x)
       ! calculated with GNU Maxima
       implicit none
-      real(dp) :: dS1_dx, x
+      real(dp) :: dS1_dx
+      real(dp), intent(in) :: x
 
     dS1_dx =(2.0E+0*(192*x**7*log(2*x+1)**2+384*x**6*log(2*x+1)**2+144*x**5*l&
 &og(2*x+1)**2-240*x**4*log(2*x+1)**2-300*x**3*log(2*x+1)**2-144*x*&
@@ -124,9 +128,10 @@ contains
     end function dS1_dx
   end function S2
 
-  function S3(x)
+  elemental function S3(x)
     implicit none
-    real(dp) :: S3, x
+    real(dp) :: S3
+    real(dp), intent(in) :: x
 
     S3 = x*S0(x)*S2(x)
   end function S3
