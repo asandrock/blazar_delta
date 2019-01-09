@@ -27,9 +27,10 @@ contains
     implicit none
     real(dp) :: Ne, g
 
-    if (g < g1 .or. g > g2) then
-      Ne = 0.0_dp
-    else if (g <= gb) then
+    !if (g < g1 .or. g > g2) then
+    !  Ne = 0.0_dp
+    !else
+ if (g <= gb) then
       Ne = N0*(g/gb)**(-p1)
     else
       Ne = N0*(g/gb)**(-p2)
