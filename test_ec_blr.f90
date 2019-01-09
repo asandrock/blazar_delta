@@ -16,7 +16,7 @@ program test_external_compton
   integer :: j, steps = 10
 
   e0 = eps0(8.17_dp*R_g)
-  do j = 12*steps, 29*steps
+  do j = 15*steps, 29*steps
     nu = 10**(j/real(steps, dp))
     eps_s = h*nu/(me*c**2)
     print *, nu, &
