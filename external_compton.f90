@@ -36,7 +36,7 @@ contains
       g_min = eps_sp/2*(1 + sqrt(1 + 1/(eps*eps_sp)))
       if (g_avg > g_min) then
         integrand = u(eps)/eps**3*Ne(g_avg/delta_D)/g_avg*M3(4*g_avg*eps)
-      else 
+      else
         integrand = u(eps)/eps**3*Ne(g_min/delta_D)/g_min*M3(4*g_min*eps) &
           *(g_avg/g_min)**1.5_dp
       end if
@@ -122,7 +122,7 @@ contains
       end function Ne
     end interface
     real(dp) :: R_g, Lumi_Edd, R_in, R_out, mu_max, mu_min, eps_sp, mu_s
-    real(dp) :: abserr, ph_save, prefactor
+    real(dp) :: integral, abserr, ph_save, prefactor
     integer :: neval, ier
 
     eps_sp = (1 + z)*eps_s
@@ -138,9 +138,20 @@ contains
 
     mu_min = 1/sqrt(1 + (R_out/rr)**2)
     mu_max = 1/sqrt(1 + (R_in/rr)**2)
-    call qng(ph_integrand, 0.0_dp, 2*pi, epsabs, epsrel, ec_disk, abserr, &
+    call qng(ph_integrand, 0.0_dp, 2*pi, epsabs, epsrel, integral, abserr, &
       neval, ier)
+    ec_disk = integral + f_disk(eps_sp)
   contains
+    function f_disk(eps)
+      ! emission of the accretion disk
+      implicit none
+      real(dp) :: f_disk, eps, eps_max
+
+      eps_max = 2.7e-4*(l_edd/(M_8*eta))**0.25_dp*(R_in/R_g)**(-0.75_dp)
+      f_disk = 1.12_dp*l_edd*Lumi_Edd/(4*pi*d_L**2)*(eps/eps_max)**(4/3.0_dp) &
+        *exp(-eps/eps_max)
+    end function f_disk
+
     function ph_integrand(ph)
       implicit none
       real(dp) :: ph_integrand, ph
