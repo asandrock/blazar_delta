@@ -279,4 +279,46 @@ contains
       end do
     end function
   end function ec_blr
+
+  function ec_dust(eps_s, z, d_L, delta_D, Gamm, Ne, L_disk, rr, xi_dt, R_dt, &
+    Theta, g1)
+    implicit none
+    real(dp) :: ec_dust, eps_s, z, d_L, delta_D, Gamm, L_disk, rr, xi_dt, &
+      R_dt, Theta, g1
+    interface
+      function Ne(g)
+        use const
+        real(dp) :: Ne, g
+      end function Ne
+    end interface
+
+    real(dp) :: prefactor, mu_s, eps_sp, x2, abserr, eps0
+    integer :: neval, ier
+
+    eps_sp = (1 + z)*eps_s
+    mu_s = (Gamm*delta_D - 1)/(Gamm*sqrt(1 - 1/Gamm**2)*delta_D)
+    x2 = R_dt**2 + rr**2
+    eps0 = 2.7_dp*Theta
+    prefactor = eps_sp*xi_dt*L_disk*sigma_T*delta_D**3/(80*pi**3 &
+      *eps0**2*x2*d_L**2)
+    call qng(phi_int, 0.0_dp, 2*pi, epsabs, epsrel, ec_dust, abserr, neval, ier)
+  contains
+    function phi_int(phi)
+      implicit none
+      real(dp) :: phi_int, phi
+      real(dp) :: g_avg, g_min, cos_psi
+
+      cos_psi = rr*mu_s/sqrt(x2) + sqrt(1 - rr**2/x2)*sqrt(1 - mu_s**2)*cos(phi)
+      g_avg = gamma_general(eps0, eps_sp, cos_psi)
+      g_min = max(eps_sp/2*(1 + sqrt(1 + 2/(eps0*eps_sp*(1 - cos_psi)))), &
+        g1*delta_D)
+      if (g_min < g_avg) then
+        phi_int = prefactor*S3(eps0*g_avg*(1 - cos_psi)) &
+          *Ne(g_avg/delta_D)
+      else
+        phi_int = prefactor*S3(eps0*g_min*(1 - cos_psi)) &
+          *Ne(g_min/delta_D)*(g_avg/g_min)**2
+      end if
+    end function phi_int
+  end function ec_dust
 end module external_compton
