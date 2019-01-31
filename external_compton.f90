@@ -327,7 +327,7 @@ contains
     real(dp) :: f_dust, eps, z, d_L, Theta, L_disk, xi_dt, eps_bh
 
     eps_bh = eps*(1 + z)
-    f_dust = L_disk*xi_dt/(4*pi*d_L**2)*15/pi**4*(eps/Theta)**4 &
-      *exp(-eps/Theta)/(1 - exp(-eps/Theta))
+    f_dust = L_disk*xi_dt/(4*pi*d_L**2)*15/pi**4*(eps_bh/Theta)**4 &
+      *exp(-eps_bh/Theta)/(1 - exp(-eps_bh/Theta))
   end function f_dust
 end module external_compton
