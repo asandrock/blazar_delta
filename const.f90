@@ -23,9 +23,9 @@ module const
     microbarn = 1e-30_dp ! cm^2
   real(dp), parameter :: k = 1.3806488e-16_dp, & ! erg/K, Boltzmann constant
     a_SB = 8*pi**5*k**4/(15*h**3*c**3) ! Stefan-Boltzmann radiation energy density constant
-  real(dp), parameter :: Omega_m = 0.3_dp, Omega_L = 0.7_dp, &
-    Omega_k = 0.0_dp, Omega_r = 0.0_dp, & ! Cosmology parameters
+  real(dp), parameter :: Omega_m = 0.3089_dp, Omega_L = 0.6911_dp, &
+    Omega_k = 1 - Omega_m - Omega_L, Omega_r = 0.0_dp, & ! Cosmology parameters
     Mpc = 3.08567758149137e24_dp, & ! cm, Megaparsec in cm
-    H0 = 70e5_dp/Mpc ! cm/s/Mpc, Hubble constant
+    H0 = 67.74e5_dp/Mpc ! cm/s/Mpc, Hubble constant
   real(dp), parameter :: epsabs = 1e-60_dp, epsrel = 1e-5_dp
 end module const
