@@ -9,6 +9,7 @@ FFLAGS = -Wall -ffpe-trap=invalid,zero -O3 -g -fPIC
 all: $(addprefix build/, test_compton test_external_compton test_ec_blr test_ec_dust)
 objects_compton = $(addprefix build/, const.o quadpack.o compton.o dilog.o)
 objects_external = $(addprefix build/, gamma_avg.o zeroin.o external_compton.o)
+objects_ssc = $(addprefix build/, const.o gamma_avg.o dilog.o ssc.o zeroin.o quadpack.o)
 
 # Linking of the executables
 build/test_compton: build/test_compton.o $(objects_compton) | build
@@ -32,6 +33,7 @@ build/test_ec_dust.o: $(addprefix build/, external_compton.o)
 build/compton.o: $(addprefix build/, const.o quadpack.o dilog.o)
 build/gamma_avg.o: $(addprefix build/, zeroin.o compton.o)
 build/external_compton.o: $(addprefix build/, compton.o const.o gamma_avg.o)
+build/ssc.o: $(addprefix build/, const.o gamma_avg.o dilog.o)
 
 build/%.o build/%.mod: %.f | build
 	${F90} ${FFLAGS} -J build -o build/$*.o -c $<
