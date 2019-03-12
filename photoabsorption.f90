@@ -33,7 +33,7 @@ contains
       mu = 1/sqrt(1 + Rt**2/l_save**2)
       st = eps0(Rt)*eps_1*(1 + z)*(1 - mu)/2
       R_int = phi(Rt)/(Rt**1.25_dp*(1 + Rt**2/l_save**2)**1.5_dp) &
-        *sigma_gg(st)*(1 - mu)
+        *sigma_gg(st)*(1 - mu)/l_save**2
     end function R_int
 
     function eps0(Rt)
