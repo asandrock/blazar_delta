@@ -4,12 +4,14 @@ module bh_pair
   use const
   !use quadpack
   implicit none
+  public :: S0, M0, S1, M1, S2, M2, S3, M3
+  private
 contains
   pure function S0(k)
     ! total cross section, divided by Thomson cross section to be analogous to
     ! Compton scattering, cf. eqq. (A1, A2).
     implicit none
-    real(dp) :: S0, eta, ln2k, _2k
+    real(dp) :: S0, eta, ln2k, k2
     real(dp), intent(in) :: k
 
     if (k < 2.0_dp) then
@@ -20,10 +22,10 @@ contains
         + (37*eta**3)/120 + (61*eta**4)/192)
     else
       ln2k = log(2*k)
-      _2k = 2/k
-      S0 = 3*alpha/(8*pi)*((28*ln2k)/9 - 218/27.0_dp + _2k**2*(6*ln2k &
+      k2 = 2/k
+      S0 = 3*alpha/(8*pi)*((28*ln2k)/9 - 218/27.0_dp + k2**2*(6*ln2k &
         - 7/2.0_dp + 2/3.0_dp*ln2k**3 - ln2k**2 - pi**2/3*ln2k + 2*zeta3 &
-        + pi**/6) - _2k**4*((3*ln2k)/16 + 1/8.0_dp) - _2k**6*(29/(9.0_dp*256) &
+        + pi**2/6) - k2**4*((3*ln2k)/16 + 1/8.0_dp) - k2**6*(29/(9.0_dp*256) &
         *ln2k - 77/(27.0_dp*512)))
     end if
   end function S0
@@ -31,16 +33,16 @@ contains
   pure function S1(k)
     ! K, cf. eq. (3.7-3.10)
     implicit none
-    real(dp) :: S1, lnk_1, lnk1
+    real(dp) :: S1, lnk_1, lnk1, lnk
     real(dp), intent(in) :: k
     real(dp), parameter :: a0 = 1.0_dp, a1 = 0.3958_dp, a2 = 0.1000_dp, &
       a3 = 0.00781_dp
     real(dp), parameter :: b0 = -8.778_dp, b1 = 5.512_dp, b2 = -1.614_dp, &
       b3 = 2/3.0_dp
 
-    if (x < 2.0_dp) then
+    if (k < 2.0_dp) then
       S1 = 0.0_dp
-    else if (x < 1e3_dp) then
+    else if (k < 1e3_dp) then
       lnk_1 = log(k - 1)
       S1 = 4*me/mp/k*(a0 + a1*lnk_1 + a2*lnk_1**2 + a3*lnk_1**3)
     else
@@ -50,23 +52,26 @@ contains
     end if
   end function S1
 
-  function M0(x)
+  pure function M0(x)
     implicit none
-    real(dp) :: M0, x
+    real(dp) :: M0
+    real(dp), intent(in) :: x
 
     M0 = alpha*re**2*8/(3*sigma_T)*psi(x/2)
   end function M0
 
-  function M1(x)
+  pure function M1(x)
     implicit none
-    real(dp) :: M1, x
+    real(dp) :: M1
+    real(dp), intent(in) :: x
 
     M1 = phi(x/2)/psi(x/2)
   end function M1
 
-  function psi(kappa)
+  pure function psi(kappa)
     implicit none
-    real(dp) :: psi, kappa
+    real(dp) :: psi
+    real(dp), intent(in) :: kappa
 
     if (kappa < 2.0_dp) then
       psi = 0.0_dp
@@ -84,9 +89,10 @@ contains
     end if
   end function psi
 
-  function phi(kappa)
+  pure function phi(kappa)
     implicit none
-    real(dp) :: phi, kappa, k_2
+    real(dp), intent(in) :: kappa
+    real(dp) :: phi, k_2, lnk
     real(dp), parameter :: c1 = 0.8048_dp, c2 = 0.1459_dp, c3 = 1.137e-3_dp, &
       c4 = -3.879e-6_dp
     real(dp), parameter :: d0 = -86.07_dp, d1 = 50.96_dp, d2 = -14.45_dp, &
@@ -103,4 +109,36 @@ contains
         - f2/kappa**2 - f3/kappa**3)
     end if
   end function phi
+
+  elemental function S3(x)
+    implicit none
+    real(dp) :: S3
+    real(dp), intent(in) :: x
+
+    S3 = x*S0(x)*S2(x)
+  end function S3
+
+  elemental function M3(x)
+    implicit none
+    real(dp) :: M3
+    real(dp), intent(in) :: x
+
+    M3 = M0(x)*M2(x)
+  end function M3
+
+  elemental function M2(x)
+    implicit none
+    real(dp) :: M2
+    real(dp), intent(in) :: x
+
+    M2 = 0.0_dp !FIXME
+  end function M2
+
+  elemental function S2(x)
+    implicit none
+    real(dp) :: S2
+    real(dp), intent(in) :: x
+
+    S2 = 0.0_dp !FIXME
+  end function S2
 end module bh_pair
