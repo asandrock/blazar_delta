@@ -127,7 +127,7 @@ contains
     integer :: neval, ier
 
     eps_sp = (1 + z)*eps_s
-    mu_s = (Gamm*delta_D - 1)/(Gamm*sqrt(1 - 1/Gamm**2)*delta_D)
+    mu_s = min((Gamm*delta_D - 1)/(sqrt(Gamm**2 - 1)*delta_D), 1.0_dp)
 
     R_g = 1.5e13_dp*M_8
     Lumi_Edd = 1.26e46_dp*M_8
@@ -224,7 +224,7 @@ contains
     integer :: ph_neval, ph_ier
 
     eps_sp = (1 + z)*eps_s
-    mu_s = (Gamm*delta_D - 1)/(Gamm*sqrt(1 - 1/Gamm**2)*delta_D)
+    mu_s = min((Gamm*delta_D - 1)/(sqrt(Gamm**2 - 1)*delta_D), 1.0_dp)
     prefactor = L_disk*sigma_T*delta_D**3/(80*pi**3*d_L**2)
     call qng(ph_integrand, 0.0_dp, 2*pi, epsabs, epsrel, ph_int, ph_err, &
       ph_neval, ph_ier)
@@ -296,7 +296,7 @@ contains
     integer :: neval, ier
 
     eps_sp = (1 + z)*eps_s
-    mu_s = (Gamm*delta_D - 1)/(Gamm*sqrt(1 - 1/Gamm**2)*delta_D)
+    mu_s = min((Gamm*delta_D - 1)/(sqrt(Gamm**2 - 1)*delta_D), 1.0_dp)
     x2 = R_dt**2 + rr**2
     eps0 = 2.7_dp*Theta
     prefactor = eps_sp*xi_dt*L_disk*sigma_T*delta_D**3/(80*pi**3 &
