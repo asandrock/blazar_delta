@@ -49,3 +49,17 @@ clean:
 	rm -rf build
 
 .PHONY: all clean install
+
+# Stuff for testing
+build/3C454_3: build/3C454_3.o $(objects_compton) $(objects_external)\
+ $(objects_ssc) build/luminosity_distance.o build/photoabsorption.o | build
+	${F90} ${FFLAGS} -o $@ $^
+build/4C71_07: build/4C71_07.o $(objects_compton) $(objects_external)\
+ $(objects_ssc) build/luminosity_distance.o build/photoabsorption.o | build
+	${F90} ${FFLAGS} -o $@ $^
+build/dermer: build/dermer.o $(objects_compton) $(objects_external)\
+ $(objects_ssc) build/luminosity_distance.o | build
+	${F90} ${FFLAGS} -o $@ $^
+build/dermer.o: $(addprefix build/, ssc.o external_compton.o photoabsorption.o luminosity_distance.o)
+build/W-Com.o: $(addprefix build/, ssc.o external_compton.o photoabsorption.o luminosity_distance.o)
+build/4C71_07.o: $(addprefix build/,ssc.o external_compton.o photoabsorption.o luminosity_distance.o)
