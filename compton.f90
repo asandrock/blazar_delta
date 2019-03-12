@@ -4,6 +4,8 @@ module compton
   use dilog
   !use quadpack
   implicit none
+  public :: S0, M0, S1, M1, S2, M2, S3, M3
+  private
 contains
   pure function S0(x)
     ! cf. eq. (11-13)

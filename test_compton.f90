@@ -1,6 +1,7 @@
 program test_compton
   ! Reproduce figg. 2-7
   use compton
+  use const
   implicit none
   real(dp) :: x
   integer :: j

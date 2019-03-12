@@ -2,6 +2,7 @@ module gamma_avg
   ! Functions to determine <gamma> for general and isotropic seed radiation
   ! fields
   use compton
+  use const
   !use zeroin
   implicit none
   interface
