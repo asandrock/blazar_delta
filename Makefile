@@ -63,3 +63,7 @@ build/dermer: build/dermer.o $(objects_compton) $(objects_external)\
 build/dermer.o: $(addprefix build/, ssc.o external_compton.o photoabsorption.o luminosity_distance.o)
 build/W-Com.o: $(addprefix build/, ssc.o external_compton.o photoabsorption.o luminosity_distance.o)
 build/4C71_07.o: $(addprefix build/,ssc.o external_compton.o photoabsorption.o luminosity_distance.o)
+
+build/test_absorption.o: $(addprefix build/, photoabsorption.o const.o)
+build/test_absorption: $(addprefix build/, test_absorption.o photoabsorption.o const.o quadpack.o)
+	${F90} ${FFLAGS} -o $@ $^
