@@ -33,7 +33,7 @@ contains
       mu = 1/sqrt(1 + Rt**2/l_save**2)
       st = eps0(Rt)*eps_1*(1 + z)*(1 - mu)/2
       R_int = phi(Rt)/(Rt**1.25_dp*(1 + Rt**2/l_save**2)**1.5_dp) &
-        *sigma_gg(st)*(1 - mu)
+        *sigma_gg(st)*(1 - mu)/l_save**2
     end function R_int
 
     function eps0(Rt)
@@ -79,7 +79,7 @@ contains
       real(dp), dimension(n_li) :: integ, x2, mu_star, s
 
       x2 = (R_li**2 + l_save**2 - 2*l_save*R_li*mu_re)
-      mu_star = 1 - (R_li/(R_g*sqrt(x2)))**2*(1 - mu_re**2)
+      mu_star = sqrt(1 - (R_li/(R_g*sqrt(x2)))**2*(1 - mu_re**2))
       s = eps_li*eps_1*(1 + z)*(1 - mu_star)/2
       integ = 900*xi_li*l_edd/eps_li/x2*sigma(s)*(1 - mu_star)
       mu_int = sum(integ)
