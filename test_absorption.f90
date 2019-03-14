@@ -6,13 +6,14 @@ program test_absorption
   ! Parameters from Table 3
   real(dp), parameter :: M_8 = 1.2e1_dp, R_g = 1.8e14_dp, L_disk = 2e46_dp, &
     eta = 1/12.0_dp, Theta = k*1e3_dp/(me*c**2), xi_dt = 0.1_dp, &
-    R_dt = 3.5e18_dp, redshift = 0.0_dp
+    R_dt = 3.5e18_dp, redshift = 0.859_dp
   ! Derived parameter
   real(dp), parameter :: l_edd = L_disk/(1.26e46_dp*M_8)
   ! From Appendix
   real(dp), parameter :: L_H_beta = 4.2e43_dp, R_H_beta = 4.3e17_dp
 
-  integer :: j
+  integer :: i, j
+  character(len=2) :: i_string
   integer, parameter :: steps = 10, n_BLR = 26
   real(dp) :: eps, energy, z_jet
   real(dp), dimension(n_BLR) :: eps_BLR, xi_BLR, lambda_BLR, lumi_BLR, &
@@ -40,15 +41,19 @@ program test_absorption
   xi_BLR = lumi_BLR*L_H_beta/L_disk
   R_BLR = rad_BLR*R_H_beta
 
-  z_jet = R_BLR(8) ! R_BLR(8) = R(Ly α)
-
-  do j = 0*steps, 5*steps
-    energy = 1e-3_dp*TeV*10.0_dp**(j/real(steps, dp))
-    eps = energy/(me*c**2)
-    print *, energy*1e3_dp/TeV, &
-      tau_disk(eps, redshift, l_edd, M_8, eta, z_jet), &
-      tau_blr(eps, redshift, l_edd, z_jet, R_g, xi_BLR, R_BLR, eps_BLR, &
-        n_BLR), &
-      tau_dust(eps, redshift, xi_dt, l_edd, Theta, R_dt, R_g, z_jet)
+  do i = -1, 2
+    z_jet = 10.0_dp**i*1.1e17_dp!R_BLR(8) ! R_BLR(8) = R(Ly α)
+    write(i_string,'(I2)') i
+    open(unit=23, file='tau_1e'//trim(i_string)//'.dat')
+    do j = 0*steps, 5*steps
+      energy = 1e-3_dp*TeV*10.0_dp**(j/real(steps, dp))
+      eps = energy/(me*c**2)
+      write (23,'(4E12.3)') energy*1e3_dp/TeV, &
+        tau_disk(eps, redshift, l_edd, M_8, eta, z_jet), &
+        tau_blr(eps, redshift, l_edd, z_jet, R_g, xi_BLR, R_BLR, eps_BLR, &
+          n_BLR), &
+        tau_dust(eps, redshift, xi_dt, l_edd, Theta, R_dt, R_g, z_jet)
+    end do
+    close(unit=23)
   end do
 end program

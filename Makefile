@@ -4,7 +4,8 @@ endif
 
 
 F90 = gfortran
-FFLAGS = -Wall -ffpe-trap=invalid,zero -O3 -g -fPIC
+#FFLAGS = -Wall -ffpe-trap=invalid,zero -O0 -fPIC -g -pg
+FFLAGS = -Wall -ffpe-trap=invalid,zero -O3 -fPIC
 
 all: $(addprefix build/, test_compton test_external_compton test_ec_blr test_ec_dust)
 objects_compton = $(addprefix build/, const.o quadpack.o compton.o dilog.o)
@@ -34,6 +35,7 @@ build/compton.o: $(addprefix build/, const.o quadpack.o dilog.o)
 build/gamma_avg.o: $(addprefix build/, zeroin.o compton.o)
 build/external_compton.o: $(addprefix build/, compton.o const.o gamma_avg.o)
 build/ssc.o: $(addprefix build/, const.o gamma_avg.o dilog.o)
+build/photoabsorption.o: $(addprefix build/, const.o multidim_integrate.o quadpack.o)
 
 build/%.o build/%.mod: %.f | build
 	${F90} ${FFLAGS} -J build -o build/$*.o -c $<
@@ -52,18 +54,18 @@ clean:
 
 # Stuff for testing
 build/3C454_3: build/3C454_3.o $(objects_compton) $(objects_external)\
- $(objects_ssc) build/luminosity_distance.o build/photoabsorption.o | build
+ $(objects_ssc) build/luminosity_distance.o build/photoabsorption.o build/multidim_integrate.o | build
 	${F90} ${FFLAGS} -o $@ $^
 build/4C71_07: build/4C71_07.o $(objects_compton) $(objects_external)\
- $(objects_ssc) build/luminosity_distance.o build/photoabsorption.o | build
+ $(objects_ssc) build/luminosity_distance.o build/photoabsorption.o build/multidim_integrate.o | build
 	${F90} ${FFLAGS} -o $@ $^
 build/dermer: build/dermer.o $(objects_compton) $(objects_external)\
- $(objects_ssc) build/luminosity_distance.o | build
+ $(objects_ssc) build/luminosity_distance.o build/photoabsorption.o build/multidim_integrate.o | build
 	${F90} ${FFLAGS} -o $@ $^
-build/dermer.o: $(addprefix build/, ssc.o external_compton.o photoabsorption.o luminosity_distance.o)
+build/dermer.o: $(addprefix build/, ssc.o external_compton.o photoabsorption.o  luminosity_distance.o)
 build/W-Com.o: $(addprefix build/, ssc.o external_compton.o photoabsorption.o luminosity_distance.o)
-build/4C71_07.o: $(addprefix build/,ssc.o external_compton.o photoabsorption.o luminosity_distance.o)
+build/4C71_07.o: $(addprefix build/,ssc.o external_compton.o photoabsorption.o  luminosity_distance.o)
 
 build/test_absorption.o: $(addprefix build/, photoabsorption.o const.o)
-build/test_absorption: $(addprefix build/, test_absorption.o photoabsorption.o const.o quadpack.o)
+build/test_absorption: $(addprefix build/, test_absorption.o photoabsorption.o build/multidim_integrate.o const.o quadpack.o)
 	${F90} ${FFLAGS} -o $@ $^

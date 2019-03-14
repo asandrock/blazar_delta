@@ -1,20 +1,39 @@
 module photoabsorption
   ! Photoabsorption by external radiation fields
   use const
+  use multidim_integrate, only: dcuhre
   implicit none
 contains
   function tau_disk(eps_1, z, l_edd, M_8, eta, rr)
     implicit none
     real(dp) :: tau_disk, eps_1, l_edd, M_8, eta, rr, z
     real(dp) :: l_err, l_save, prefactor, R_g, R_in, R_out
-    integer :: l_neval, l_ier
+    integer :: l_neval, l_ier, nsub
+    real(dp), dimension(2) :: aa, bb
+    real(dp), dimension(1) :: res, err
 
     R_g = 1.5e13_dp*M_8
     R_in = 6*R_g ! Schwarzschild black hole
     R_out = 200*R_g ! simple assumption from Finke (2016)
     prefactor = 1e7_dp*l_edd**0.75_dp*M_8**0.25_dp/eta**0.75_dp
-    call qagi(l_int, rr/R_g, 1, epsabs, epsrel, tau_disk, l_err, l_neval, l_ier)
+    !call qagi(l_int, rr/R_g, 1, epsabs, epsrel, tau_disk, l_err, l_neval, l_ier)
+    aa = [0.0_dp, log(R_in/R_g)]
+    bb = [R_g/rr, log(R_out/R_g)]
+    call dcuhre(2, 1, aa, bb, int(1e3), int(1e5), funsub, epsabs, epsrel, 0, 0, &
+      res, err, l_neval, l_ier, nsub)
+    tau_disk = res(1)
+    if (l_ier /= 0) tau_disk = -1.0_dp
   contains
+    subroutine funsub(ndim, z, nfun, f)
+      implicit none
+      integer, intent(in) :: ndim, nfun
+      real(dp), intent(in) :: z(:)
+      real(dp), intent(out) :: f(:)
+
+      l_save = 1/z(1)
+      f = R_int(z(2))*l_save**2
+    end subroutine funsub
+
     function l_int(l)
       implicit none
       real(dp) :: l_int, l
@@ -22,18 +41,22 @@ contains
       integer :: R_neval, R_ier
 
       l_save = l
-      call qng(R_int, R_in/R_g, R_out/R_g, epsabs, epsrel, l_int, R_err, &
-        R_neval, R_ier)
+      call qng(R_int, log(R_in/R_g), log(R_out/R_g), epsabs, epsrel, l_int, &
+        R_err, R_neval, R_ier)
     end function l_int
 
-    function R_int(Rt)
+    function R_int(log_Rt)
       implicit none
+      real(dp), intent(in) :: log_Rt
       real(dp) :: R_int, Rt, mu, st
+
+      Rt = exp(log_Rt)
 
       mu = 1/sqrt(1 + Rt**2/l_save**2)
       st = eps0(Rt)*eps_1*(1 + z)*(1 - mu)/2
-      R_int = phi(Rt)/(Rt**1.25_dp*(1 + Rt**2/l_save**2)**1.5_dp) &
-        *sigma_gg(st)*(1 - mu)/l_save**2
+      R_int = prefactor*phi(Rt)/(Rt**1.25_dp*(1 + Rt**2/l_save**2)**1.5_dp) &
+        *sigma_gg(st)*(1 - mu)/l_save**2 &
+        *Rt
     end function R_int
 
     function eps0(Rt)
@@ -58,42 +81,56 @@ contains
     integer :: n_li
     real(dp), dimension(n_li) :: xi_li, R_li, eps_li
     real(dp) :: l_save, l_err
-    integer :: l_neval, l_ier
+    integer :: l_neval, l_ier, nsub
+    real(dp), dimension(2) :: aa, bb
+    real(dp), dimension(n_li) :: res, err
 
-    call qagi(l_int, rr/R_g, 1, epsabs, epsrel, tau_blr, l_err, l_neval, l_ier)
+    !call qagi(l_int, rr/R_g, 1, epsabs, epsrel, tau_blr, l_err, l_neval, l_ier)
+    !call qng(l_int, 0.0_dp, R_g/rr, epsabs, epsrel, tau_blr, l_err, l_neval, l_ier)
+    aa = [0.0_dp, -1.0_dp]
+    bb = [R_g/rr, 1.0_dp]
+    call dcuhre(2, n_li, aa, bb, int(1e3), int(1e5), funsub, epsabs, epsrel, 0, 0, &
+      res, err, l_neval, l_ier, nsub)
+    tau_blr = sum(res)
+    if (l_ier /= 0) tau_blr = -1.0_dp
   contains
-    function l_int(l)
+    subroutine funsub(ndim, z, nfun, f)
       implicit none
-      real(dp) :: l_int, l
+      integer, intent(in) :: ndim, nfun
+      real(dp), intent(in) :: z(:)
+      real(dp), intent(out) :: f(:)
+
+      l_save = 1/z(1)
+      f = mu_int(z(2))
+    end subroutine funsub
+
+    function l_int(l1)
+      implicit none
+      real(dp) :: l_int, l1
       real(dp) :: mu_err
       integer :: mu_neval, mu_ier
 
-      l_save = l
+      l_save = 1/l1
+      !call qags(mu_int, -1.0_dp, 1.0_dp, epsabs, epsrel, l_int, mu_err, &
+      !  mu_neval, mu_ier)
       call qng(mu_int, -1.0_dp, 1.0_dp, epsabs, epsrel, l_int, mu_err, &
         mu_neval, mu_ier)
     end function l_int
 
     function mu_int(mu_re)
       implicit none
-      real(dp) :: mu_int, mu_re
-      real(dp), dimension(n_li) :: integ, x2, mu_star, s
+      real(dp), dimension(n_li) :: mu_int
+      real(dp) :: mu_re
+      real(dp), dimension(n_li) :: integ, x2, mu_star, s, Rg2_x2, aux
 
-      x2 = (R_li**2 + l_save**2 - 2*l_save*R_li*mu_re)
-      mu_star = sqrt(1 - (R_li/(R_g*sqrt(x2)))**2*(1 - mu_re**2))
+      x2 = ((R_li/R_g)**2 + l_save**2 - 2*l_save*R_li/R_g*mu_re)
+      Rg2_x2 = R_li**2 + (R_g*l_save)**2 - 2*(l_save*R_g)*R_li*mu_re
+      aux = max(0.0_dp, 1 - R_li**2/Rg2_x2*(1 - mu_re**2))
+      mu_star = sqrt(aux)
       s = eps_li*eps_1*(1 + z)*(1 - mu_star)/2
-      integ = 900*xi_li*l_edd/eps_li/x2*sigma(s)*(1 - mu_star)
-      mu_int = sum(integ)
+      integ = 900*xi_li*l_edd/eps_li/x2*sigma_gg(s)*(1 - mu_star)
+      mu_int = integ*l_save**2
     end function mu_int
-
-    function sigma(s)
-      implicit none
-      real(dp), dimension(n_li) :: sigma, s
-      integer :: j
-
-      do j = 1, n_li
-        sigma(j) = sigma_gg(s(j))
-      end do
-    end function sigma
   end function tau_blr
 
   function tau_dust(eps_1, z, xi, l_edd, Theta, R_dt, R_g, rr)
@@ -103,6 +140,7 @@ contains
     integer :: neval, ier
 
     call qagi(integrand, rr/R_g, 1, epsabs, epsrel, tau_dust, err, neval, ier)
+    if (ier /= 0) tau_dust = -1.0_dp
   contains
     function integrand(l)
       implicit none
@@ -115,10 +153,11 @@ contains
     end function integrand
   end function tau_dust
 
-  function sigma_gg(s)
+  elemental function sigma_gg(s)
     ! sigma_gg/sigma_T
     implicit none
-    real(dp) :: sigma_gg, s, beta
+    real(dp) :: sigma_gg, beta
+    real(dp), intent(in) :: s
 
     if (s > 4.0_dp) then
       beta = sqrt(1 - 1/s)
