@@ -131,12 +131,12 @@ contains
       real(dp) :: mu_re
       real(dp) :: integ, x2, mu_star, s, Rg2_x2, aux
 
-      x2 = ((R_li/R_g)**2 + l_save**2 - 2*l_save*R_li/R_g*mu_re)
-      Rg2_x2 = R_li**2 + (R_g*l_save)**2 - 2*(l_save*R_g)*R_li*mu_re
+      x2 = (R_li/R_g - l_save)**2 + 2*l_save*R_li/R_g*(1 - mu_re)
+      Rg2_x2 = (R_li - R_g*l_save)**2 + 2*(l_save*R_g)*R_li*(1 - mu_re)
       if (abs(mu_re) < 1) then
         aux = max(0.0_dp, 1 - R_li**2/Rg2_x2*(1 - mu_re**2))
       else
-        aux = 0.0_dp
+        aux = 1.0_dp
       end if
       mu_star = sqrt(aux)
       s = eps_li*eps_1*(1 + z)*(1 - mu_star)/2
