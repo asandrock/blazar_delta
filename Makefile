@@ -7,7 +7,7 @@ F90 = gfortran
 #FFLAGS = -Wall -ffpe-trap=invalid,zero -O0 -fPIC -g -pg
 FFLAGS = -Wall -ffpe-trap=invalid,zero -O3 -fPIC
 
-all: $(addprefix build/, test_compton test_external_compton test_ec_blr test_ec_dust)
+all: $(addprefix build/, test_compton test_external_compton test_ec_blr test_ec_dust test_absorption)
 objects_compton = $(addprefix build/, const.o quadpack.o compton.o dilog.o)
 objects_external = $(addprefix build/, gamma_avg.o zeroin.o external_compton.o)
 objects_ssc = $(addprefix build/, const.o gamma_avg.o dilog.o ssc.o zeroin.o quadpack.o)
@@ -67,5 +67,5 @@ build/W-Com.o: $(addprefix build/, ssc.o external_compton.o photoabsorption.o lu
 build/4C71_07.o: $(addprefix build/,ssc.o external_compton.o photoabsorption.o  luminosity_distance.o)
 
 build/test_absorption.o: $(addprefix build/, photoabsorption.o const.o)
-build/test_absorption: $(addprefix build/, test_absorption.o photoabsorption.o build/multidim_integrate.o const.o quadpack.o)
+build/test_absorption: $(addprefix build/, test_absorption.o photoabsorption.o multidim_integrate.o const.o quadpack.o)
 	${F90} ${FFLAGS} -o $@ $^
