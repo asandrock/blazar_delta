@@ -4,25 +4,27 @@ module photoabsorption
   use multidim_integrate, only: dcuhre
   implicit none
 contains
-  function tau_disk(eps_1, z, l_edd, M_8, eta, rr)
+  function tau_disk(eps_1, z, l_edd, M_8, R_g, eta, rr)
     implicit none
-    real(dp) :: tau_disk, eps_1, l_edd, M_8, eta, rr, z
-    real(dp) :: l_err, l_save, prefactor, R_g, R_in, R_out
+    real(dp) :: tau_disk, eps_1, l_edd, M_8, eta, rr, z, R_g
+    real(dp) :: l_err, l_save, prefactor, R_in, R_out
     integer :: l_neval, l_ier, nsub
     real(dp), dimension(2) :: aa, bb
     real(dp), dimension(1) :: res, err
 
-    R_g = 1.5e13_dp*M_8
     R_in = 6*R_g ! Schwarzschild black hole
     R_out = 200*R_g ! simple assumption from Finke (2016)
     prefactor = 1e7_dp*l_edd**0.75_dp*M_8**0.25_dp/eta**0.75_dp
-    !call qagi(l_int, rr/R_g, 1, epsabs, epsrel, tau_disk, l_err, l_neval, l_ier)
+    !call qng(l_int, 0.0_dp, R_g/rr, epsabs, epsrel, tau_disk, l_err, l_neval, l_ier)
     aa = [0.0_dp, log(R_in/R_g)]
     bb = [R_g/rr, log(R_out/R_g)]
-    call dcuhre(2, 1, aa, bb, int(1e3), int(1e5), funsub, epsabs, epsrel, 0, 0, &
+    call dcuhre(2, 1, aa, bb, int(1e2), int(1e6), funsub, epsabs, epsrel, 0, 0, &
       res, err, l_neval, l_ier, nsub)
     tau_disk = res(1)
-    !if (l_ier /= 0) tau_disk = -1.0_dp
+    !if (l_ier /= 0) then
+    !  print *, 'l_ier', l_ier
+    !  STOP 'tau_disk'
+    !end if
   contains
     subroutine funsub(ndim, z, nfun, f)
       implicit none
@@ -31,7 +33,7 @@ contains
       real(dp), intent(out) :: f(:)
 
       l_save = 1/z(1)
-      f = R_int(z(2))*l_save**2
+      f = R_int(z(2))
     end subroutine funsub
 
     function l_int(l)
@@ -40,9 +42,13 @@ contains
       real(dp) :: R_err
       integer :: R_neval, R_ier
 
-      l_save = l
+      l_save = 1/l
       call qng(R_int, log(R_in/R_g), log(R_out/R_g), epsabs, epsrel, l_int, &
         R_err, R_neval, R_ier)
+    !if (R_ier /= 0) then
+    !  print *, 'R_ier', R_ier
+    !  STOP 'tau_disk'
+    !end if
     end function l_int
 
     function R_int(log_Rt)
@@ -55,9 +61,10 @@ contains
 
       mu = 1/sqrt(1 + Rt**2/l_save**2)
       st = eps0(Rt)*eps_1*(1 + z)*(1 - mu)/2
-      R_int = prefactor*phi(Rt)**0.25_dp/(Rt**1.25_dp &
+      R_int = prefactor*phi(Rt)**0.25_dp &
+          /(Rt**1.25_dp &
         *(1 + Rt**2/l_save**2)**1.5_dp) &
-        *sigma_gg(st)*(1 - mu)/l_save**2 &
+        *sigma_gg(st)*(1 - mu) &!/l_save**2 &
         *Rt
     end function R_int
 
