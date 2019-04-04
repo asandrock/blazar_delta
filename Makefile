@@ -69,3 +69,6 @@ build/4C71_07.o: $(addprefix build/,ssc.o external_compton.o photoabsorption.o  
 build/test_absorption.o: $(addprefix build/, photoabsorption.o const.o)
 build/test_absorption: $(addprefix build/, test_absorption.o photoabsorption.o multidim_integrate.o const.o quadpack.o)
 	${F90} ${FFLAGS} -o $@ $^
+build/3C84.o: $(addprefix build/, photoabsorption.o const.o)
+build/3C84: $(addprefix build/, 3C84.o photoabsorption.o multidim_integrate.o const.o quadpack.o)
+	${F90} ${FFLAGS} -o $@ $^
