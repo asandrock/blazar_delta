@@ -42,14 +42,15 @@ program test_absorption
   R_BLR = rad_BLR*R_H_beta
 
   do i = -1, 2
-    z_jet = 10.0_dp**i*1.1e17_dp!R_BLR(8) ! R_BLR(8) = R(Ly α)
+    !z_jet = 10.0_dp**i*1.1e17_dp!R_BLR(8) ! R_BLR(8) = R(Ly α)
+    z_jet = 10.0_dp**i*R_BLR(8) ! R_BLR(8) = R(Ly α)
     write(i_string,'(I2)') i
     open(unit=23, file='tau_1e'//trim(i_string)//'.dat')
     do j = 0*steps, 5*steps
       energy = 1e-3_dp*TeV*10.0_dp**(j/real(steps, dp))
       eps = energy/(me*c**2)
       write (23,'(4E12.3)') energy*1e3_dp/TeV, &
-        tau_disk(eps, redshift, l_edd, M_8, eta, z_jet), &
+        tau_disk(eps, redshift, l_edd, M_8, R_g, eta, z_jet), &
         tau_blr(eps, redshift, l_edd, z_jet, R_g, xi_BLR, R_BLR, eps_BLR, &
           n_BLR), &
         tau_dust(eps, redshift, xi_dt, l_edd, Theta, R_dt, R_g, z_jet)
