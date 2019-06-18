@@ -13,7 +13,7 @@ objects_external = $(addprefix build/, gamma_avg.o zeroin.o external_compton.o)
 objects_ssc = $(addprefix build/, const.o gamma_avg.o dilog.o ssc.o zeroin.o quadpack.o)
 
 # Linking of the executables
-build/liboptical_depth.a: $(addprefix build/, optical_depth.o const.o photoabsorption.o multidim_integrate.o)
+build/liboptical_depth.a: $(addprefix build/, optical_depth.o const.o photoabsorption.o multidim_integrate.o quadpack.o)
 	ar cr $@ $^
 build/test_compton: build/test_compton.o $(objects_compton) | build
 	${F90} ${FFLAGS} -o $@ $^
