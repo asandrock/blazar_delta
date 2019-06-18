@@ -37,15 +37,16 @@ contains
 
     real(dp), dimension(n_BLR) :: eps_BLR, xi_BLR, R_BLR
 
-    eps = real(eps_c, dp)
-    z_jet = real(z_jet_c, dp)
-    redshift = real(redshift_c, dp)
     L_Hbeta = real(L_Hbeta_c, dp)
     R_Hbeta = real(R_Hbeta_c, dp)
 
     eps_BLR = (h*c/lambda_BLR)/(me*c**2)
     xi_BLR = lumi_BLR*L_Hbeta/L_disk
     R_BLR = rad_BLR*R_Hbeta
+
+    eps = real(eps_c, dp)
+    redshift = real(redshift_c, dp)
+    z_jet = real(z_jet_c, dp)*R_BLR(8) ! R_BLR(8) = R(Ly α)
 
     tau_gg_blr = real(tau_blr(eps, redshift, l_edd, z_jet, R_g, xi_BLR, R_BLR, &
       eps_BLR, n_BLR), c_double)

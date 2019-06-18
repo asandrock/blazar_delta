@@ -26,9 +26,10 @@ def tau_blr(
     Parameters
     ----------
     eps
-        Energy of VHE-photon in units of electron rest energy
+        Energy of VHE-photon in units of electron rest energy.
     z_jet
-        Distance from black hole to photon production zone in cm
+        Distance from black hole to photon production zone in units of the
+        radius of the Lyman α emitting BLR shell.
     redshift
         Redshift of emitting blazar. Set to zero, if you want the energies in
         the reference frame of the host galaxy.
