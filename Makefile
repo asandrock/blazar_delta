@@ -28,17 +28,17 @@ build/test_ec_dust: build/test_ec_dust.o $(objects_compton) $(objects_external)\
 	${F90} ${FFLAGS} -o $@ $^
 
 # Add Module dependencies
-build/optical_depth.o: $(addprefix build/, const.o photoabsorption.o)
-build/test_compton.o: $(addprefix build/, compton.o)
-build/test_external_compton.o: $(addprefix build/, external_compton.o)
-build/test_ec_blr.o: $(addprefix build/, external_compton.o)
-build/test_ec_dust.o: $(addprefix build/, external_compton.o)
+build/optical_depth.o: $(addprefix build/, const.o photoabsorption.mod)
+build/test_compton.o: $(addprefix build/, compton.mod)
+build/test_external_compton.o: $(addprefix build/, external_compton.mod)
+build/test_ec_blr.o: $(addprefix build/, external_compton.mod)
+build/test_ec_dust.o: $(addprefix build/, external_compton.mod)
 
-build/compton.o: $(addprefix build/, const.o quadpack.o dilog.o)
-build/gamma_avg.o: $(addprefix build/, zeroin.o compton.o)
-build/external_compton.o: $(addprefix build/, compton.o const.o gamma_avg.o)
-build/ssc.o: $(addprefix build/, const.o gamma_avg.o dilog.o)
-build/photoabsorption.o: $(addprefix build/, const.o multidim_integrate.o quadpack.o)
+build/compton.o: $(addprefix build/, const.mod quadpack.o dilog.mod)
+build/gamma_avg.o: $(addprefix build/, zeroin.o compton.mod)
+build/external_compton.o: $(addprefix build/, compton.mod const.mod gamma_avg.mod)
+build/ssc.o: $(addprefix build/, const.mod gamma_avg.mod dilog.mod)
+build/photoabsorption.o: $(addprefix build/, const.mod multidim_integrate.mod quadpack.o)
 
 build/%.o build/%.mod: %.f | build
 	${F90} ${FFLAGS} -J build -o build/$*.o -c $<
