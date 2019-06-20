@@ -3,7 +3,7 @@ module optical_depth
   use const
   use photoabsorption
   implicit none
-  !public :: 
+  public :: optical_depth_blr
   private
   integer, parameter :: n_BLR = 26
   ! BLR template from Finke 2016, Appendix
