@@ -280,6 +280,68 @@ contains
     end function
   end function ec_blr
 
+  function ec_blr_ring(eps_s, z, d_L, delta_D, Gamm, Ne, L_disk, rr, xi_li, &
+    R_li, eps_li, n_li, g1)
+    implicit none
+    real(dp) :: ec_blr_ring, eps_s, z, d_L, delta_D, Gamm, L_disk, rr, g1
+    interface
+      function Ne(g)
+        use const
+        real(dp) :: Ne, g
+      end function Ne
+    end interface
+    integer, intent(in) :: n_li
+    real(dp), dimension(n_li) :: xi_li, R_li, eps_li
+
+    real(dp) :: prefactor, cos_ph, ph_int, ph_err, mu_s, eps_sp
+    integer :: ph_neval, ph_ier
+
+    eps_sp = (1 + z)*eps_s
+    mu_s = min((Gamm*delta_D - 1)/(sqrt(Gamm**2 - 1)*delta_D), 1.0_dp)
+    prefactor = L_disk*sigma_T*delta_D**3/(80*pi**3*d_L**2)
+    call qng(ph_integrand, 0.0_dp, 2*pi, epsabs, epsrel, ph_int, ph_err, &
+      ph_neval, ph_ier)
+    ec_blr_ring = ph_int
+  contains
+    function ph_integrand(phi)
+      implicit none
+      real(dp) :: ph_integrand, phi
+      real(dp), dimension(n_li) :: g_avg, g_min, cos_psi, x2, integ
+      integer :: j
+
+      cos_ph = cos(phi)
+      x2 = R_li**2 + rr**2
+      cos_psi = rr*mu_s/sqrt(x2) + sqrt(1 - rr**2/x2)*sqrt(1 - mu_s**2)*cos_ph
+
+      do j = 1, n_li
+        g_avg(j) = gamma_general(eps_li(j), eps_sp, cos_psi(j))
+      end do
+      g_min = max(eps_sp/2*(1 + sqrt(1 + 2/(eps_li*eps_sp*(1 - cos_psi)))), &
+        g1*delta_D)
+
+      where (g_avg > g_min)
+        integ = prefactor*xi_li*(eps_sp/eps_li**2) &
+          /x2*S3(g_avg*eps_li*(1 - cos_psi)) &
+          *N_e(g_avg/delta_D)
+      else where
+        integ = prefactor*xi_li*(eps_sp/eps_li**2) &
+          /x2*S3(g_min*eps_li*(1 - cos_psi)) &
+          *N_e(g_min/delta_D)*(g_avg/g_min)**2
+      end where
+      ph_integrand = sum(integ)
+    end function ph_integrand
+
+    function N_e(g)
+      implicit none
+      real(dp), dimension(n_li) :: N_e, g
+      integer :: k
+
+      do k = 1, n_li
+        N_e(k) = Ne(g(k))
+      end do
+    end function
+  end function ec_blr_ring
+
   function ec_dust(eps_s, z, d_L, delta_D, Gamm, Ne, L_disk, rr, xi_dt, R_dt, &
     Theta, g1)
     implicit none
