@@ -51,4 +51,31 @@ contains
     tau_gg_blr = real(tau_blr(eps, redshift, l_edd, z_jet, R_g, xi_BLR, R_BLR, &
       eps_BLR, n_BLR), c_double)
   end subroutine optical_depth_blr
+
+  subroutine optical_depth_blr_ring(tau_gg_blr, eps_c, z_jet_c, redshift_c, &
+      L_Hbeta_c, R_Hbeta_c) bind(C)
+    implicit none
+    real(c_double), intent(out) :: tau_gg_blr
+    real(c_double), intent(in) :: eps_c, z_jet_c, redshift_c, L_Hbeta_c, &
+      R_Hbeta_c
+    real(dp) :: eps, z_jet, redshift, L_Hbeta, R_Hbeta
+    real(dp), parameter :: M_8 = 1.0_dp, R_g = 1.5e13_dp*M_8, &
+      L_disk = 1.26e46_dp*M_8, l_edd = 1.0_dp
+
+    real(dp), dimension(n_BLR) :: eps_BLR, xi_BLR, R_BLR
+
+    L_Hbeta = real(L_Hbeta_c, dp)
+    R_Hbeta = real(R_Hbeta_c, dp)
+
+    eps_BLR = (h*c/lambda_BLR)/(me*c**2)
+    xi_BLR = lumi_BLR*L_Hbeta/L_disk
+    R_BLR = rad_BLR*R_Hbeta
+
+    eps = real(eps_c, dp)
+    redshift = real(redshift_c, dp)
+    z_jet = real(z_jet_c, dp)*R_BLR(8) ! R_BLR(8) = R(Ly α)
+
+    tau_gg_blr = real(tau_blr_ring(eps, redshift, l_edd, z_jet, R_g, xi_BLR, &
+      R_BLR, eps_BLR, n_BLR), c_double)
+  end subroutine optical_depth_blr_ring
 end module optical_depth
