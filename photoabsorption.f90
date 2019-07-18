@@ -162,7 +162,7 @@ contains
     real(dp) :: abserr
     integer :: neval, ier
 
-    call qagi(l_int, rr/R_g, epsabs, epsrel, tau_blr_ring, abserr, neval, ier)
+    call qagi(l_int, rr/R_g, 1, epsabs, epsrel, tau_blr_ring, abserr, neval, ier)
   contains
     function l_int(l)
       implicit none
