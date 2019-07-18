@@ -152,6 +152,29 @@ contains
     end function mu_int
   end function tau_blr
 
+  function tau_blr_ring(eps_1, z, l_edd, rr, R_g, xi_li, R_li, eps_li, n_li)
+    implicit none
+    real(dp) :: tau_blr_ring, eps_1, z, l_edd, R_g, rr
+    integer :: n_li
+    real(dp), dimension(n_li) :: xi_li, R_li, eps_li
+    real(dp) :: abserr
+    integer :: neval, ier
+
+    call qagi(l_int, rr/R_g, epsabs, epsrel, tau_blr_ring, abserr, neval, ier)
+  contains
+    function l_int(l)
+      implicit none
+      real(dp) :: l_int, l
+
+      real(dp), dimension(n_li) :: x2, s
+
+      x2 = (R_li/R_g)**2 + l**2
+      s = eps_li*eps_1*(1 + z)*(1 - l/sqrt(x2))/2
+
+      l_int = sum(900*l_edd*xi_li/eps_li/x2*(1 - l/sqrt(x2))*sigma_gg(s))
+    end function l_int
+  end function tau_blr_ring
+
   function tau_dust(eps_1, z, xi, l_edd, Theta, R_dt, R_g, rr)
     implicit none
     real(dp) :: tau_dust, eps_1, z, xi, l_edd, Theta, R_dt, R_g, rr
