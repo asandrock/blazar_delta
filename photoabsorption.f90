@@ -100,14 +100,9 @@ contains
     aa = [0.0_dp, -1.0_dp]
     bb = [R_g/rr, 1.0_dp]
     tau_blr = 0.0_dp
-    do j = 1, n_li
-      R_li = Rs_li(j)
-      xi_li = xis_li(j)
-      eps_li = epss_li(j)
       call dcuhre(2, 1, aa, bb, int(1e3), int(1e5), funsub, epsabs, epsrel, 0, 0, &
         res, err, l_neval, l_ier, nsub)
       tau_blr = tau_blr + res(1)
-    end do
   contains
     subroutine funsub(ndim, z, nfun, f)
       implicit none
@@ -138,16 +133,23 @@ contains
       real(dp) :: mu_re
       real(dp) :: integ, x2, mu_star, s, Rg2_x2, aux
 
-      x2 = (R_li/R_g - l_save)**2 + 2*l_save*R_li/R_g*(1 - mu_re)
-      Rg2_x2 = (R_li - R_g*l_save)**2 + 2*(l_save*R_g)*R_li*(1 - mu_re)
-      if (abs(mu_re) < 1) then
-        aux = max(0.0_dp, 1 - R_li**2/Rg2_x2*(1 - mu_re**2))
-      else
-        aux = 1.0_dp
-      end if
-      mu_star = sqrt(aux)
-      s = eps_li*eps_1*(1 + z)*(1 - mu_star)/2
-      integ = 900*xi_li*l_edd/eps_li/x2*sigma_gg(s)*(1 - mu_star)
+      integ = 0.0_dp
+      do j = 1, n_li
+        R_li = Rs_li(j)
+        xi_li = xis_li(j)
+        eps_li = epss_li(j)
+
+        x2 = (R_li/R_g - l_save)**2 + 2*l_save*R_li/R_g*(1 - mu_re)
+        Rg2_x2 = (R_li - R_g*l_save)**2 + 2*(l_save*R_g)*R_li*(1 - mu_re)
+        if (abs(mu_re) < 1) then
+          aux = max(0.0_dp, 1 - R_li**2/Rg2_x2*(1 - mu_re**2))
+        else
+          aux = 1.0_dp
+        end if
+        mu_star = sqrt(aux)
+        s = eps_li*eps_1*(1 + z)*(1 - mu_star)/2
+        integ = integ + 900*xi_li*l_edd/eps_li/x2*sigma_gg(s)*(1 - mu_star)
+      end do
       mu_int = integ*l_save**2
     end function mu_int
   end function tau_blr
