@@ -2,6 +2,8 @@ In this directory I implement a leptonic model based on Finke (2016). This paper
 develops simplified expressions for external Compton scattering on arbitrary
 external radiation fields.
 
-As a future step, I will develop similar expressions for photohadronic
-interactions with arbitrary radiation fields and the corresponding cascading
-expressions.
+The external libraries quadpack.f90 and zeroin.f are taken from
+https://people.math.sc.edu/Burkardt/f_src/quadpack/quadpack.f90
+and
+http://www.netlib.org/fmm/zeroin.f
+respectively.
