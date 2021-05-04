@@ -15,7 +15,7 @@ class build_ext_make(build_ext):
 optical_depth = Extension(
     'optical_depth',
     sources=['optical_depth.pyx'],
-    libraries=['optical_depth', 'gfortran'],
+    libraries=['optical_depth', 'gfortran', 'm'],
     library_dirs=['build'],
     include_dirs=[numpy.get_include()],
 )
