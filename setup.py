@@ -22,7 +22,7 @@ optical_depth = Extension(
 
 setup(
     name='optical_depth',
-    version='1.0',
+    version='1.0.0',
     author='Alexander Sandrock',
     author_email='alexander.sandrock@tu-dortmund.de',
     ext_modules=cythonize([optical_depth]),
